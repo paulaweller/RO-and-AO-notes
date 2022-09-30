@@ -13,9 +13,9 @@ We assume that all decision variables must be determined before the uncertain pa
 	\pi* = \min\limits_x \{t \mid Ax\leq b,\;c^Tx\leq t,\;\;\forall (c,A,b)\in\uncset\}.
 \end{align}
 A vector $x*$ satisfying feasibility for all $(c,A,b)\in\uncset$ and with an objective of at most $\pi*$ is a \textit{robust optimal solution}. It is often said that this solution optimizes for the worst case, i.e., that
-\begin{align*}\label{p1c2:minmax}
+\begin{align}\label{p1c2:minmax}
 \pi* = \min\limits_x \max\limits_{(c,A,b)\in\uncset} \{c^T x:\;Ax\leq b\}.
-\end{align*}
+\end{align}
 However, \eqref{p1c2:robustcounterpart} may have different worst-case scenarios depending on which constraint is considered, while \eqref{p1c2:minmax} has one worst-case scenario, namely the one defining the optimal objective value. In addition, in \eqref{p1c2:robustcounterpart}, a feasible solution $x$ must subject to all scenarios in $\uncset$, while in \eqref{p1c2:minmax}, the scenarios are subject to the decision $x$ (i.e., we only consider scenarios for which $x$ is feasible). The statement is thus only true in the sense that non-worst case scenarios do not influence the problem. 
 
 Note, that in \eqref{p1c2:robustcounterpart}, all of the uncertainty, including $c$, takes place in the constraints. We may therefore assume the following generic form
