@@ -1,0 +1,58 @@
+\section{Sources of Uncertainty}
+
+For many optimization problems, it is very likely that the model parameters like coefficients or right-hand sides are not highly accurate. We distinguish four different sources for this:
+\begin{enumerate}
+	\item Measurement error (Temperature, Pressure)
+	\item Estimation error (future demands, uncertain costs)
+	\item Implementation error (engineering, length)
+	\item Inexact Data error (population, road networks in developing countries)
+\end{enumerate}
+Even small deviations (0.01\%) can lead to extreme violations of the constraints and thus infeasibility of the original optimal solution.
+
+\section{Probability Theory and its Limitations}
+
+Probability theory is the predominant theory of our time to model uncertainty. But in order to estimate a probability of a relatively simple event, we need to invoke a rather heavy machinery from complex analysis and inverse of transforms. Calculating expected values from arbitrary distributions is difficult, simulating them is complicated, and approximating them not accurate. Thus, we are unable to solve probability problems when dimensions increase. This is rooted in the fact that probability theory was developed starting in the 17th century up until the beginning of the 20th century, before computational tractability became an issue. Modern linear optimization had from the beginning of the field as an objective to solve multi-dimensional problems computationally. Given the success of this, it is natural to model uncertain phenomena using RO.
+
+\section{The Building Blocks of Robust Optimization}
+
+Kolmogorov, who introduced the basic axioms of modern probability theory, states about the limit laws: "All epistemological value of the theory of probability is based on this: that large-scale random phenomena in their collective action create strict, non-random regularity." The key building block for RO is that rather than assuming as primitives the axioms of probability theory, we assume as primitives the conclutions of probability theory, namely its limit laws. Thus, we do not describe uncertain quantities as random variables, but as variables who take values from an uncertainty set $\uncset$, constructed with the underlying probability information.
+
+\section{Classes of RO Problems}
+
+There are three core problems we address: RO, ARO and DRO. The starting point is an optimization problem with uncertain parameters
+
+\begin{align*}
+	\min \{f(x) \mid f_i(z,x)\leq0,\;\forall i\in[m]\},
+\end{align*}
+where $x\in\reals^{n_x}$ is the decision vector, $z\in\reals^{n_z}$ is an uncertain parameter vector, and $f_i(\cdot,x)$ is assumed to be convex for all $x$.
+
+\subsection{Robust optimization}
+In Robust optimization, $\uncset$ is a convex compact uncertainty set and the constraints are to hold for all $z\in\uncset$, i.e., $x$ has to be robust feasible:
+\begin{align}\label{p1c1:ROproblem}
+	\min \{f(x) \mid f_i(z,x)\leq0,\;\forall z\in\uncset,\;\forall i\in[m]\}.
+\end{align}
+Because of the $\forall$-quantifier, for a contionuous uncertainty set, this problem has finitely many variables  and infinitely many constraints. The key computational issue is to reformulate problem \eqref{p1c1:ROproblem} to an equivalent, computationally tractable form.
+
+\subsection{Adaptive robust optimization}
+
+ARO differs from RO in that not all decisions are to be made \textit{here-and-now}, i.e., before any uncertain parameters become known. The \textit{wait-and-see} or adaptive decisions may be determined once some of the parameters are no longer uncertain. Since these decisions are functions of $z$, we denote them with $y(z)$. The adaptive problem can then be written as: 
+\begin{align}\label{p1c1:ROproblem}
+	\min \{f(x) \mid f_i(z,x,y(z))\leq0,\;\forall z\in\uncset,\;\forall i\in[m]\}.
+\end{align}
+
+\subsection{Distributionally robust optimization}
+
+Instead of assuming uncertain values for $\tilde{z}$ like RO and ARO, DRO assumes an uncertan distribution $\dist_z$ for it. This distribution belongs to the ambiguity set $\ambset$. In this setting, there are two principal constraint types.
+
+\textit{Worst-case expected feasibility} constraints ensure that the constraint is satisfied for the expected value of all possible distributions $\dist\in\ambset$:
+\begin{align*}
+	\min \{f(x) \mid \expected_{\dist_z} [f_i(\tilde{z},x)]\leq0,\;\forall \dist_z\in\ambset,\;\forall i\in[m]\}.
+\end{align*}
+The challenge herein is to obtain a tractable exact form of the worst-case expectation, or a good upper bound.
+
+\textit{Chance constraints} ensure that constraints are satisfied with a certain probability for all $\dist\in\ambset$:
+\begin{align*}
+	\min \{f(x) \mid \dist_z\{f_i(\tilde{z},x)\leq0\}\geq 1-\epsilon,\;\forall \dist_z\in\ambset,\;\forall i\in[m]\}.
+\end{align*}
+Here, the challenge is to obtain a safe approximation, i.e., a computationally tractable system of constraints $\mathcal{S}$ that ensures feasibility for the above condition.
+
