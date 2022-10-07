@@ -3,6 +3,11 @@
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\integers}{\mathbb{Z}}
 \newcommand{\symm}{\mathbb{S}}  % symmetric matrices
+
+\newcommand{\ev}{\mathbb{E}} %expected value
+\newcommand{\var}{\text{Var}} %variance
+\newcommand{\prob}{\mathbb{P}} %probability
+
 \newcommand{\uncset}{\mathcal{U}} % uncertainty set
 \newcommand{\uncsetbox}{\overline{\uncset}}
 \newcommand{\dist}{\mathbb{P}} % probability distribution
@@ -33,7 +38,7 @@
 \newcommand{\maxi}{\mathop{\text{max.~}}}
 \newcommand{\minf}{\mathop{\text{minimize~}}}
 \newcommand{\maxf}{\mathop{\text{maximize~}}}
-\newcommand{\st}{\mathop{\text{s.t.:~}}}
+\newcommand{\stnew}{\mathop{\text{s.t.:~}}}
 \newcommand{\stf}{\mathop{\text{subject to:~}}}
 
 \newcommand{\braces}[1]{\left\{ #1 \right \}}
@@ -53,3 +58,8 @@
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+
+
+\definecolor{spring}{RGB}{170, 227, 145}
+\newcommand{\sidenote}[1]{\pdfmargincomment{#1}}
+\newcommand{\highlight}[2]{\pdfmarkupcomment[markup=Highlight, color=spring]{#1}{#2}}

@@ -1,102 +1,86 @@
-\section{The robust counterpart}
+RO uses optimization to computationally solve optimization problems under uncertainty in very high dimensions, and it uses probability theory to select uncertainty sets that give strong guarantees the optimal robust solutions will be feasible and near optimal \highlight{if the uncertain parameters take values from arbitrary distributions}{why this addition?}. In this chapter, we learn how to select uncertainty sets based on the available data.
 
-We study the LO problem
-\begin{align}\label{p1c2:Loproblem}
-	\min\limits_x\{c^Tx\mid Ax\leq b\},
+\section{Normally Distributed Uncertain Parameters}
+
+In some cases we are able to conclude that the uncertain parameter $\tilde{z}$ follows a normal distribution, for example from historical data, or due to the central limit theorem. Suppose that the distribution has mean $\mu$ and covariance matrix $E$. Then $\tilde{w}=(Px)^T\tilde{z}$ has expected value $\ev [\tilde{w}] = (Px)^T\mu$ and $\var (\tilde{w}) = x^TP^TE Px$. Suppose that we want a constraint to hold with probability $1-\epsilon$, i.e.,
+\begin{align*}
+\prob ( (\ol{a}+P\tilde{z})^Tx \leq b) \geq 1-\epsilon.
+\end{align*}
+Due to the normal distribution, this is satisfied if and only if
+\begin{align*}
+(\ol{a}+P\mu)^Tx+\rho_{1-\epsilon}\sqrt{x^TP^TE Px}\leq b,
+\end{align*}
+where $\rho_{1-\epsilon}$ is the $(1-\epsilon)$-percentile of a standard normal distribution. This is equivalent to $(\ol{a}+Pz)^Tx\leq b$ for the uncertainty set 
+\begin{align*}
+\keyunc = \{z\; :\;\norm{E^{-\frac{1}{2}}(z-\mu)}\leq\rho_{1-\epsilon}\},
+\end{align*}
+which is ellipsoidal. Thus, ellipsoidal uncertainty sets provide probabilistic guarantees for normally distributed uncertain parameters. Note, that we want the constraint to hold with probability $1-\epsilon$, which is a weaker statement than $\prob(\tilde{z}\in\keyunc )\geq 1-\epsilon$.
+
+\section{Selecting Parameters for Uncertainty Sets}\label{p3c3sec:param}
+
+Consider the ball uncertainty set $\keyunc_\rho = \{z\in\reals^L:\;\norm{z}_2\leq\rho\}$ and the robust constraint
+\begin{align*}
+(\ol{a}+Pz)^Tx\leq b,\quad \forall z\in\keyunc_\rho,
+\end{align*}
+with corresponding RC
+\begin{align}\label{p3c3:RCcon}
+\ol{a}^Tx + \rho\norm{P^Tx}_2\leq b.
 \end{align}
-where $c\in\reals^n$, $b\in\reals^m$ and $A\in\reals^m\times\reals^n$. We address the problem where $(c,A,b)$ are uncertain, but known to reside in a compact, specified uncertainty set $\uncset$. In this case, problem \eqref{p1c2:Loproblem} is not a single deterministic problem, but a family of problems
-\begin{align}
-	\min\limits_x\{c^Tx\mid Ax\leq b\}_{(c,A,b)\in\uncset}.
+We now wish to select $\rho$ such that the probability of the constraint being satisfied is very high, when $\tilde{z}$ is stochastic.
+
+\begin{theorem}
+If $\tilde{z}_i, i\in L$ are independent random variables with support in $[-1,1]$ and zero mean, and $x$ satisfies \eqref{p3c3:RCcon}, then
+\[\prob ( (\ol{a}+P\tilde{z})^Tx\leq b)\geq 1-\exp (-\rho^2/2).\]
+\end{theorem}
+\highlight{Intuitively, this is because the weighted sum $X(\tilde{\xi})= \sum_{i=1}^k w_i\tilde{\xi}_i$ of a collection of zero-mean variables $\tilde{\xi}$ is more likely to be zero than the individual variables, since they may cancel each other out.}{Is this true?}
+
+By choosing $\rho = \sqrt{2\ln(1/\epsilon)}$, we obtain $\prob ( (\ol{a}+P\tilde{z})^Tx\leq b)\geq 1-\epsilon$. This gives us the opportunity to calculate the values of $\rho$, the uncertainty set radius, as a function of $\epsilon$, the violation probability. Most remarkably, these values of $\rho$ are independent of the dimension $L$ of the uncertainty set.
+
+\begin{figure}
+\begin{tabular}{c|c|c|c|c|c|c|c}
+ $\epsilon$	& $10^{-12}$	& $10^{-6}$	& $10^{-4}$ & $10^{-3}$	& $0.005$	& $10^{-2}$	& $10^{-1}$ \\
+ $\rho$ 			&7.44					& 5.25			& 4.29		   & 3.71				& 3.26		& 3.03			& 2.14 \\
+\end{tabular}
+\end{figure}
+
+A similar result is obtainable for the budget uncertainty set
+\begin{align*}
+\keyunc_\Gamma = \{z\in \reals^L\; : \; \norm{z}_1\leq \Gamma, \norm{z}_\infty \leq 1\}
+\end{align*}
+with the RC constraint
+\begin{align}\label{p3c3:gammacon}
+\ol{a}^Tx + \Gamma\norm{P^Tx-y}_\infty + \norm{y}_1 \leq b.
 \end{align}
-We assume that all decision variables must be determined before the uncertain parameters become known, and that the problem constraints are hard, i.e. they must be satisfied for any uncertain parameters within $\uncset$. The RO approach converts this family of problems into one single deterministic problem, referred to as \textit{robust counterpart}:
-\begin{align}\label{p1c2:robustcounterpart}
-	\pi* = \min\limits_x \{t \mid Ax\leq b,\;c^Tx\leq t,\;\;\forall (c,A,b)\in\uncset\}.
-\end{align}
-A vector $x*$ satisfying feasibility for all $(c,A,b)\in\uncset$ and with an objective of at most $\pi*$ is a \textit{robust optimal solution}. It is often said that this solution optimizes for the worst case, i.e., that
-\begin{align}\label{p1c2:minmax}
-\pi* = \min\limits_x \max\limits_{(c,A,b)\in\uncset} \{c^T x:\;Ax\leq b\}.
-\end{align}
-However, \eqref{p1c2:robustcounterpart} may have different worst-case scenarios depending on which constraint is considered, while \eqref{p1c2:minmax} has one worst-case scenario, namely the one defining the optimal objective value. In addition, in \eqref{p1c2:robustcounterpart}, a feasible solution $x$ must subject to all scenarios in $\uncset$, while in \eqref{p1c2:minmax}, the scenarios are subject to the decision $x$ (i.e., we only consider scenarios for which $x$ is feasible). The statement is thus only true in the sense that non-worst case scenarios do not influence the problem. 
+\begin{theorem}
+If $\tilde{z}_i, i\in L$ are independent random variables with support in $[-1,1]$ and zero mean, and $x$ satisfies \eqref{p3c3:gammacon}, then
+\[\prob ( (\ol{a}+P\tilde{z})^Tx\leq b)\geq 1-\exp (-\Gamma^2/(2L)). \]
+\end{theorem}
+Choosing $\Gamma = \sqrt{2\ln (1/\epsilon)}\sqrt{L}$, then, again, we can reach a confidence level of $1-\epsilon$ that the constraint will be satisfied. However, in this case, $\Gamma$ does depend on the dimension $L$ of the uncertainty set .
+\section{Comparing Uncertainty Sets}
 
-Note, that in \eqref{p1c2:robustcounterpart}, all of the uncertainty, including $c$, takes place in the constraints. We may therefore assume the following generic form
+In this section, we consider an example in single-period portfolio optimization to compare different choices of uncertainty sets. There are 200 assets, the last of which is leaving the money in the bank with a certain annual return of $r_{200} =1.05$. All other assets have uncertain annual returns $r_i, i=1,\dots,199$, modeled by independent random variables taking values in $[\mu_i-\sigma_i, \mu_i+\sigma_i]$ with expected values $\mu_i$. We set
 \begin{align*}
-	\min\limits_x & c^Tx \\
-	\text{s.t.} & a_i^Tx-b_i\leq 0, \quad \forall (A,b)\in\uncset,\quad\forall i\in[m],
+\mu_i &= 1.05 + 0.3\frac{200-i}{199}, \\
+\sigma_i &= 0.05 + 0.6\frac{200-i}{199},
 \end{align*}
-where $[m]=\{1,\dots,m\}$, $c$ is certain, and $\{a_i,b_i\}_{i\in[m]}$ are uncertain. If $\uncset$ is not a finite set, this problem has an infinite number of constraints. We observe that $\uncset$ may equivalently be replaced by its convex hull: Suppose that $a_1^Tx-b_1\leq 0$, as well as $a_2^tx-b_2\leq 0$ for $a_1,a_2\in\uncset$. Then, for $\lambda (a_1,b_1) + (1-\lambda)(a_2,b_2)\in conv(\uncset)$, where $\lambda\in(0,1$, we have
+for $i=1,\dots,199$, so that for higher $i$, we have lower expected return and lower variability. The objective is to distribute a symbolic $1\$$ between the assets in order to maximize the expected return. The uncertain LO problem is thus
 \begin{align*}
-(\lambda a_1 + (1-\lambda)a_2 )^Tx - \lambda b_1 + (1-\lambda)b_2 = \lambda (a_1^Tx-b_1) + (1-\lambda)(a_2^T-b_2)\leq 0. 
-\end{align*} 
-We will now derive a general form for the uncertain constraints which facilitates our studies. Firstly, we note that we may disassemble the uncertainty set row-wise without modifying the robustness, i.e. reformulate it such that any uncertain parameter only appears in one constraint of the uncertainty set. For instance, consider the simple uncertain constraints
-\begin{align*}
-x_i-b_i \leq 0,\; i=1,2.
+\max\limits_{x,t} & t \\
+\stnew& \sum\limits_{i=1}^199 r_ix_i + r_{200}x_{200}\geq t,\\
+& \sum\limits_{i=1}^{200} x_i = 1, \\
+& x\geq 0,
 \end{align*}
-The feasible values for $x$ remain the same, regardless of whether $b\in \uncset =\{(b_1,b_2)^T\mid b_1,b_2\geq0,\;b_1+b_2\leq 1\}$ or simply $b_i\in[0,1]$ for $i=1,2$, respectively.
-Thus, we can study the impact of uncertainty on each constraint individually. We will in the following drop the constraint index $i$, obtaining constraints of the form
+where $x_i$ is the capital invested into asset $i$, and the uncertain data  are the returns $r_i = \mu_i + \sigma_iz_i)x$, $i\in[199]$, where $z_i$ are independent random variables with zero mean varying in the interval $[-1,1]$. The resulting RC is
 \begin{align*}
-	a^Tx-b\leq0,\quad\forall (a,b)\in\uncset,
+\max\limits_{x,t} & t \\
+\stnew & \sum\limits_{i=1}^199 (\mu_i+\sigma_iz_i)x_i +1.05x_{200}\geq t,\quad \forall z\in\keyunc,\\
+& \sum\limits_{i=1}^{200} x_i = 1, \\
+& x\geq 0,
 \end{align*}
-where $a\in\reals^n,\; b\in\reals$, and $\uncset$ stands for $\uncset_i$. Furthermore, we can assume without loss of generality, that the right-hand side $b$ is certain - if not, we can introduce an extra variable $x_{n+1}$ and change the constraint to
-\begin{align*}
-	& a^Tx-bx_{n+1}\leq0,\quad\forall (a,b)\in\uncset,\\
-	& x_{n+1} = 1.
-\end{align*}
-Now, we consider the uncertain parameter $a$, separating it into a fixed nominal value $\ol{a}\in\reals^n$, common to all scenarios, and the key uncertainty $\keyunc\subseteq\reals^L$. Since the uncertain parameters may be correlated among each other, we model
-\begin{align*}
-a = \ol{a} + Pz, z\in\keyunc,
-\end{align*}
-where $P\in\reals^{n\times L}$. Note, that since the uncertainty is row-wise, we may find an equivalent uncertainty set such that $P$ is a diagonal matrix, but this may not always be to the benefit of clarity. Thus ,we obtain the general constraint
-\begin{align*}
-(\ol{a}+Pz)^Tx\leq b, \quad \forall z\in\keyunc.
-\end{align*}
-
-\section{Fundamental Uncertainty Sets}
-
-For uncertainty sets with specific fundamental shapes, it is possible to derive tractable robust counterparts.
-
-\subsection{Box uncertainty set}
-
-The uncertanity set
-\begin{align*}
-	\keyunc = \{z\mid -\rho_i\leq z_i\leq\rho_i, \forall i\in[L]\} = \{z\mid ||z||_\infty\leq\rho\}
-\end{align*}
-has the shape of  a box, where every component can independently take values in the interval $[-\rho,rho]$. This models situations in which we only have informations about the boundaries of the uncertainty, but not the relationship between the different parameters.
-We derive a tractable reformulation as follows:
-
-\begin{align*}
- & (\ol{a}+Pz)*Tx\leq b, \quad\forall z: \norm{z}_\infty\leq\rho \\
- \ifff & \ol{a}^Tx+\max\limits_{z:\norm{z}_\infty\leq\rho} (P^Tx)^Tz\leq b \\
- \ifff & \ol{a}^Tx+\rho\norm{P^Tx}_1 \leq b.
-\end{align*}
-This constraint can be modeled as a set of linear constraints, leading to a linear, but slightly larger RC where the uncertanity has been replaced by the safety term $\rho\norm{P^Tx}_1$.
-
-\subsection{Polyhedral uncertainty set}
-
-A polyhedral uncertainty set is specified by $q$ linear inequalities:
-\begin{align*}
-& (\ol{a}+Pz)*Tx\leq b, \quad\forall z: d-Dz\geq 0, \\
-\ifff & \ol{a}^Tx + \max\limits_{z:d-Dz\geq 0} (P^Tx)^Tz\leq b \\
-\ifff & \ol{a}^Tx + \min\limits_{y\geq 0:D^Ty=P^Tx} d^Ty \leq b.
-\end{align*}
-where $d\in\reals^q$ and $D\in\reals^q\times L$. If, for some $y\geq0$ such that $D^Ty = P^Tx$, we have $\ol{a}^Tx+d^Ty\leq b$, then this certainly also holds for the corresponding minimum. We can therefore drop the $\min$-operator, obtaining the equivalent conditions  
-\begin{align*}
- \ol{a}^Tx + d^Ty \leq b,\;D^Ty=P^Tx,\;y\geq 0.
-\end{align*}
-As a system of linear constraints, the corresponding RC is tractable, albeit of increased size compared to the original problem. Since box uncertainty is a special case of polyhedral uncertainty, this is a generalization of the box reformulation.
-
-\subsection{Budget uncertainty set}
-
-In practice, it is usually unlikely that extreme senarios like the corners of box uncertainty sets will occur, where all parameters show maximal deviation from the nominal value. To make the RO problems less conservative, we may in addition to the box constraints use so-called budget constraints on the uncertainty, which ensure that the aggregated sum of deviations $z_i$ may not exceed the uncertainty budget $\Gamma$.
-\begin{align}\label{p1c1:budgetunc}
-\uncset = \{z:\;\norm{z}_infty\leq\rho,\;\norm{z}_1\leq\Gamma\}
-\end{align}
-If $\Gamma$ is small enough, this set cuts off the corners of the box uncertainty set. As a subset of the box uncertainty set, the RC for budget uncertainty is thus at least as tight as the box RC. By writing \eqref{p1c1:budgetunc} in the format of $d-Dz\geq 0$, we can show that $x$ satifies
-\begin{align*}
-(\ol{a}+Pz)^Tx\leq b,\quad \forall z:\;\norm{z}_infty\leq\rho,\;\norm{z}_1\leq\Gamma,
-\end{align*}
-if and only if there exists $y$ such that $(x,y)$ satisfies
-\begin{align*}
-\ol{a}^Tx+\rho\norm{y}_1+\Gamma\norm{P^Tx-y}_\infty\leq b.
-\end{align*}
-
-As a final remark, the given derivations also hold for integer $x$, since the duality used in the derivation was with respect to $z$, and not $x$.
+for a variety of uncertainty sets $\keyunc$. We want the expected return to be guaranteed with a probability of at least $99.5\%$. Using the results from Section \ref{p3c3sec:param}, we select  values $\rho$ and $\Gamma$ for the uncertainty sets that give us the probabilistic guarantees we desire. We thus consider the following sets $\keyunc$:
+\begin{itemize}
+	\item[Box:] $\keyunc_1 = \{z:\norm{z}_\infty \leq 1\}$, which models only the fact that the uncertainties take values in [-1,1].
+	\item[Ball-Box:] $\keyunc_2 = \{z:\norm{z}_\infty \leq 1, \norm{z}_2\leq \rho\}$, with $\rho = \sqrt{2 \ln (1/\epsilon)}=3.26$, ensuring that the uncertain constraint is satisfied with probability at least $1-\epsilon = 0.995$.
+	\item[Budget:] $\keyunc_3 = \{z:\norm{z}_\infty \leq 1, \norm{z}_1\leq \Gamma\}$, where $\Gamma = 45.92$, again ensuring constraint satisfaction with probability $1-\epsilon = 0.995$. 
+\end{itemize}
+For the three uncertainty sets, we get the optimal guaranteed returns of $1.05$ (Box), $1.12$ (Ball-Box) and $1.10$ (Budget). \highlight{In this case, the ball-box uncertainty set has an advantage over the budget uncertainty set, since the choice of parameter $\rho$ is independent of the dimension of the uncertainty set. $\Gamma$ depends on this dimension, which makes the uncertainty set larger.}{good insight}

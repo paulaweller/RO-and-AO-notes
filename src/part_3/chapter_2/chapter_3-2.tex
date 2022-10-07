@@ -70,7 +70,17 @@ We derive a tractable reformulation as follows:
 \end{align*}
 This constraint can be modeled as a set of linear constraints, leading to a linear, but slightly larger RC where the uncertanity has been replaced by the safety term $\rho\norm{P^Tx}_1$.
 
-\subsection{Polyhedral uncertainty set}
+\subsection{Ellipsoidal Uncertainty Set}
+
+For ellipsoidal uncertainty, the RC becomes:
+\begin{align*}
+& (\ol{a}+Pz)^Tx \leq b,\quad\forall z:\;\norm{z}_2\leq\rho.\\
+\Leftrightarrow & \ol{a}^Tx + \max\limits_{z:\norm{z}_2\leq\rho} (P^Tx)^Tz \leq b\\
+\Leftrightarrow & \ol{a}^Tx+\rho\norm{P^Tx}_2\leq b,
+\end{align*}
+where the last iff is obtained using the KKT conditions of the inner maximization problem. We don't need any extra variables or constraints, and the constraint is of the type second order cone and can be solved efficiently with state-of-the-art solvers.
+
+\subsection{Polyhedral Uncertainty Set}
 
 A polyhedral uncertainty set is specified by $q$ linear inequalities:
 \begin{align*}
