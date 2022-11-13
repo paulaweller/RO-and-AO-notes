@@ -1,0 +1,75 @@
+In this chapter, we introduce algorithms to solve AROs based on decision rules. Specifically, we extensively discuss linear decision rules (LDRs).
+
+\begin{section}{Linear Decision Rules}
+
+Using LDRs for the second-stage decisions results in a tractable RO problem. We consider one constraint of problem \ref{p3c5:adaptiveprob} and assume the right-hand side $b$ does not depend on $z$:
+\begin{align}\label{p3c6:constraint}
+(\ol{a}+Pz)^Tx+d^Ty \leq b, \quad \forall z\in\keyunc,
+\end{align}
+where $y$ is adaptive, i.e., a vector function of $z$, also called a decision rule. Note that the problem is fixed-recourse. General problems with such constraints are NP-hard. To make the problem tractable, we restrict $y = y(z)$ to a given class of functions. Such a decision rule may not be optimal due to that restriction. The LDR for \eqref{p3c6:constraint} is 
+\begin{align}
+y = u+Vz,
+\end{align}
+where the coefficients $u\in\reals^{n_2}$ and $V\in\reals^{n_2\times L}$ are to be determined and thus become here-and-now optimization variables in \eqref{p3c6:constraint}. Substituting, we obtain
+\begin{align}
+(\ol{a}+Pz)^Tx+d^T(u+Vz) \leq b, \quad \forall z\in\keyunc,
+\end{align}
+with optimization variables $x,u,V$. This constraint is linear in all variables and in $z$, so all classical RO results on tractable reformulations apply. Nevertheless, the number of variables has increased. This can be counteracted by various measures, such as omitting decision rules for constraint-wise uncertain parameters because the classical RO solution is optimal for such parameters.
+
+\section{A Dual Reformulation of ARO}
+
+In this section, we introduce a dual reformulation of the ARO problem by consecutively dualizing over the wait-and-see variables and then over the uncertain parameters. The resulting problem is again an ARO problem, in which some of the dual variables are adaptive. For ARO problems with fixed recourse and polyhedral uncertainty sets, the new dual adaptive model is solved n order of magnitude faster than the primal adaptive formulation.
+
+We start with the ARO problem:
+
+\begin{align}\label{p3c6:dualprob1}
+\min\limits_{x\inX,y(\cdot)\geq 0} \{c^Tx: Ax+By(z)\geq Rz+r,\quad\forall z\in\keyunc\}, \\
+\keyunc = \{z\geq0 : Dz\leq b\}.
+\end{align}
+
+Although the uncertainty is in the right-hand side, the same derivation can be done for eft-hand side uncertainty, in case of fixed recourse. We rewrite \eqref{p3c6:dualprob1} as
+
+\begin{align}\label{p3c6:dualprob2}
+\min\limits_{x\inX}\max\limits_{z\in\keyunc}\min\limits_{y(\cdot)\geq 0} \{c^Tx: Ax+By(z)\geq Rz+r\}, \\
+\keyunc = \{z\geq0 : Dz\leq b\}.
+\end{align}
+and dualize this over $y$, resulting in a $\min_x\;max_{z,w}$ formulation, where $w$ are the newly introduced dual variables. We subsequently dualize over $z$ in the inner max, which yields a formulation of the form $min_x\;max_w\;\min_\lambda$. With an epigraph formulation and exploiting the scalar multiplicity of the adaptive dual variable $\lambda$, we obtain the following dual reformulation.
+
+\begin{theorem}
+The here-and-now decision $x$ is feasible and optimal for \eqref{p3c6:dualprob1} with nonempty uncertainty set $\keyunc$ if and only if $x$ is feasible and optimal for 
+\begin{align}\label{p3c6:dualreformulation}
+\min_x & c^Tx \\
+\stnew & \forall w\in \mathcal{V}: \exists \lambda\geq0: w^T(Ax-r)-d^T\lambda\geq 0, \;\; D^T\lambda \geq R^Tw,\\
+& x\in X,
+\end{align}
+where $\mathcal{V} = \{w\geq 0:\; B^Tw\leq 0,\; e^Tw = 1\}.$
+\end{theorem}
+
+If LDRs are adopted for $\lambda(w)$$, then \eqref{p3c6:dualreformulation} yields a tractable problem. Since it is an ARO problem, the complexity isn't reduced in a strict sense, but the reformulation provides better lower bounds in the following approach: We seek to find lower bounds by solving the primal and dual problems for a finite number of scenarios. To make the bounds tight, we obtain informative scenarios in the following way: We adopt an affine decision policy in each of the problems and identify in each case via an optimization problem binding scenarios. These scenarios are added to the finite set. Then we solve the combined primal and dual problem for this finite set of binding scenarios. The hope is that scenarios which are binding for the affine problem are also binding for the general solution.
+
+Numerical results show that the combined primal and dual binding scenarios  yield lower bounds that are up to 31 \% stronger compared to a primal scenario only approach. \highlight{Moreover, the dual reformulation can be solved much faster than the primal one}{Why?}.
+
+\sidenote{What does combining primal&dual in general do?}
+
+\pdfnote
+
+\section{LDRs with Inexact Data}
+
+In ARO, the decision in each stage is a function of the information accumulated from the previous periods on the values of the uncertain parameters. This information could be inaccurate. Thus, reliance on the data as is may lead to poor performance of ARO. This weakness can be remedied by introducing a methodology that treats past data itself as an uncertain parameter. In this section, we show that algorithmic tractability of the RCs associated with this extension is still maintained.
+
+So far, we have assumed that there is a moment in time where the data $z$ is known exactly. However, in many practical applications only an estimate $\hat{z}$ of the true value can be obtained. In that case we have inexact data and $\hat{z}$ is not exactly equal to $z$, but we may assume that the estimation error $\hat{z}-z$ resides in another closed convex set $\hat{\keyunc}$, which we call the \textit{estimation uncertainty}. We also denote this as $z\in\{\hat{z}\}+\hat{\keyunc}$, the Minkowski sum of a singleton and a set. Note that estimation errors of different components of $\hat{z}-z$ can be correlated. The linear decision rule for the wait-and-see variable is only allowed to use the estimate $\hat{z}$:
+\begin{align*}
+y = u + V\hat{z}.
+\end{align*}
+We call the RC in this new setting the affinely adaptive RC with decision rules based on inexact data (ARCID):
+
+
+
+
+
+\begin{align}\label{p3c5:adaptiveprob}
+z_{adapt} = \min\limits_{x,y(\cdot})} & c^T x + \max\limits_{z\in\keyunc} d^Ty(z) \\
+\stnew & A(z)x+ B(z)y(z) \leq \beta(z),\quad\forall z\in\keyunc \\
+& x\geq 0, y(z)\geq 0,
+\end{align}
+where $x\in\reals^{n_1}$ is the first-stage decision that is made before $z\in\reals^L$ is realized, and $y(z)\in\reals^{n_2}$ is the second-stage decision that can be adjusted according to the actual data. Note, that $y$ is not an optimization variable, but a function to be optimized. $A(z),B(z)$ are coefficient matrices that are linear in $z$, as is the right-hand-side $\beta(z)$. An important case is called fixed recourse, which is when the coefficient matrix $B$ of the adaptable variables is certain. In this chapter, we introduce exact and approximate solution methods for this problem.
