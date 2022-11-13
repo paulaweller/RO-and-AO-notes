@@ -39,7 +39,7 @@ Z_R = & \min  && c^Tx + \max\limits_{S:\;S\subseteq[n],\vert S\vert\leq\Gamma} \
 \end{align}
 where $\mathcal{F}\subseteq \{0,1\}^n$ is the feasible set, and the coefficients $c_j\in[\ol{c}_j,\ol{c}_j+d_j]$ for $j\in[n]$ are uncertain,and at most $\Gamma$ of them are allowed to change. Without loss of generality, we assume that the indices are ordered such that $d_1\geq d_2\geq \dots\geq d_n$, and define $d_{n+1} = 0$ for notational convenience.
 
-\begin{theorem}
+\begin{theorem}\label{p3c4:thm:n+1prob}
 Problem \eqref{p3c4:binRO} reduces to solving n+1 nominal problems:
 \[Z_R = \min\limits_{\ell\in [n+1]} G_\ell ,\]
 where for $\ell \in [n+1]$:
@@ -121,3 +121,80 @@ Note that we critically used the fact that it is a binary problem, so this resul
 
 \section{Robust Network Flows}
 
+Even if more general reformulation alnd solution techniques can not be applied, it is sometimes possible to derive problem-specific solutions. In this section, we solve a robust minimum cost flow problem (i.e., not binary) by solving a collection of modified nominal min cost flows. The minimum cost flow problem is defined as follows. Given a directed graph $G=(\mathcal{N}, \mathcal{A})$supplies/demands $b_i,i\in\mathcal{N}$ and arc costs $c_{ij}, (i,j)\in\mathcal{A}$, we wish to find a flow of supplies that satisfies all demands with minimal cost. The LP formulation of the problem is thus
+\begin{equation}\label{p3c4:nomflowprob}
+\begin{array}{rll}
+\min 		& \sum\limits_{(i,j)\in \mathcal{A}}c_{ij}x_{ij} & \\
+\stnew	& \sum\limits_{\{j:(i,j)\in \mathcal{A}\}}x_{ij} -\sum\limits_{\{j:(j,i)\in  \mathcal{A}\}}x_{ji} = b_i & \forall i\in \mathcal{V} \\
+			& 0\leq x_{ij} \leq u_{ij} &\forall (i,j)\in  \mathcal{A} \\
+\end{array}
+\end{equation}
+Network flow problems have integral extreme points, i.e., if \eqref{p3c4:nomflowprob} has integral data, then optimal solutions of the problem are also integral.
+
+We assume that the network topology and the suplies/demands are not subject to uncertainty. The only source of uncertainty is the cost vector $c$, where we have $c_{ij}\in[\ol{c}_{ij},\ol{c}_{ij}+d_{ij}]$ and at most $\Gamma$ of the coefficients are allowed to change. Denoting the feasible set with $\mathcal{F}$, the robust problem is then:
+\begin{equation}\label{p3c4:solvedprob}
+\begin{array}{rl}
+Z_R = & \min c^Tx+\max\limits_{\{S\vert S\subseteq \mathcal{A},\vert S\vert\leq\Gamma\}}\sum\limits_{(i,j)\in S}d_{ij}x_{ij} \\
+ & \text{s.t. } x\in \mathcal{F}.
+\end{array}
+\end{equation}
+Since the decision variables $x$ are not binary, theorem \ref{p3c4:thm:n+1prob} is not directly applicable. However, executing the first steps of the proof of the theorem, we can obtain an equivalent problem $Z_R = \min_{\theta\geq0}Z(\theta)$, where
+\begin{equation}\label{EQ:24}
+\begin{array}{rclc}
+Z(\theta )= & \Gamma\theta +\min & c^Tx+\sum\limits_{(i,j)\in \mathcal{A}}p_{ij} & \\
+			& \text{subject to } & p_{ij}\geq d_{ij}x_{ij}-\theta & \forall (i,j)\in \mathcal{A} \\
+			&					 & p_{ij}\geq 0					  & \forall (i,j)\in \mathcal{A} \\
+			&					 & x\in \mathcal{F} & \\			
+\end{array}
+\end{equation}
+This is an integer optimization problem without the original flow type structure. This is material as network flow problems can be solved by two orders of magnitude faster than even linear optimization problems. Nevertheless, taking advantage of specific problem structures, it is possible to derive a polynomial-time solution algorithm.
+
+\begin{theorem}
+For a fixed $\theta\geq 0$, problem \ref{EQ:24} can be solved as a network flow problem.
+\end{theorem}
+\begin{proof}
+We eliminate $p_{ij}$ and obtain:
+
+\begin{equation}\label{EQ:25}
+\begin{array}{rcl}
+Z(\theta )=	& \Gamma\theta +\min	&  c^Tx + \sum\limits_{(i,j)\in \mathcal{A}}d_{ij}\max\left(x_{ij}-\frac{\theta}{d_{ij}},0\right) \\
+			& \text{subject to }	& x\in \mathcal{F}
+\end{array}
+\end{equation}
+
+We now modify $G$ by replacing every arc $(i,j)\in\mathcal{A}$ as shown in Figure  \eqref{ABB:bogen}.
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[scale=0.7, every node/.style={transform shape},
+roundnode/.style={circle, draw=MidnightBlue, fill=MidnightBlue!5, very thick, minimum size=12mm}]
+\tikzset{myline/.style={very thick, draw=MidnightBlue,->}}
+%Nodes
+\node at (0,0) [roundnode] (I)	{\color{MidnightBlue}\large{i}};
+\node at (8,0) [roundnode] (J)	{\color{MidnightBlue}\large{j}};
+
+\draw[very thick, dashed, MidnightBlue,->]	(4,-1) -- (4,-2);
+
+\node at (0,-5) 	[roundnode] (I2)	{\color{MidnightBlue}\large{i}};
+\node at (8,-5) 	[roundnode] (J2)	{\color{MidnightBlue}\large{j}};
+\node at (3,-5)		[roundnode] (I')	{\color{MidnightBlue}\large{i'}};
+\node at (5.5,-3)	[roundnode] (J')	{\color{MidnightBlue}\large{j'}};
+%Lines
+\draw[myline] (I) -- node[above] {\color{MidnightBlue}\large{$(c_{ij},u_{ij})$}}	(J) ;
+\draw[myline] (I2) -- node[below]{\color{MidnightBlue}\large{$(c_{ij},u_{ij})$}}	(I');
+\draw[myline] (I') -- node[above,sloped] {\color{MidnightBlue}\large{$(d_{ij},\infty)$}}(J');
+\draw[myline] (I') -- node[below] {\color{MidnightBlue}\large{$(0,\theta/d_{ij})$}}(J2);
+\draw[myline] (J') -- node[above,sloped] {\color{MidnightBlue}\large{$(0,\infty)$}}(J2);
+\end{tikzpicture}
+\caption{Construction of $G'$}\label{ABB:bogen}
+\end{figure}
+Now we show that solving a Min Cost Flow problem on $G'$ leads to the solution of problem (\eqref{EQ:25}) 
+
+Let $x*$ be an optimal solution to \eqref{EQ:25}. For every arc $(i,j)\in \mathcal{A}$, we consider two cases:
+\begin{itemize}
+	\item If $x^*_{ij}\leq\theta/d_{ij}$, then the flow $x^*_{ij}$will, in $G'$, flow via $(i,i')$ and $(i',j)$, leading to a cost of \[c_{ii'}x^*_{ij}+c_{i'j}x^*_{ij} = c_{ij}x^*_{ij}\].
+	\item If $x^*_{ij}\geq\theta/d_{ij}$, then $x^*_{ij}$ is divided at node $i'$: A quanityt of $\theta/d_{ij}$ flows via $(i',j)$, while the excess $x^*_{ij}-(\theta/d_{ij})$ is routed via $(i',j')$ and $(j',j)$, such that the cost adds up to \[c_{ij}x_{ij}+d_{ij}\left(x_{ij}-\frac{\theta}{d_{ij}}\right).\]
+\end{itemize}
+In both cases, the contribution to cost matches the objective function value in \eqref{EQ:25}.
+\end{proof}
+
+It is straightforward to show that $Z(\theta)$ is a convex function. Thus, by executing a line search, we may approximate the optimal solution of \eqref{p3c4:solvedprob} to any degree of accuracy by executing a corresponding number of function evaluations, that is, min cost flow problems.

@@ -1,0 +1,88 @@
+In previous chapters, we have assumed that all optimization variables are here-and-now decisions, i.e., we have to determine the values for these variables now, and we cannot wait until we have more information on th uncertain parameters. However, especially in multi-period decision problems, the values of some of the variables, which are called wait-and-see variables, can be determined after the uncertain parameter values have been revealed. In other words, we can postpone some of the decisions until we have obtained more or full information on some of the uncertain parameters. It is of course very likely that using this information will improve the decision. Adaptive Robust Optimization (ARO) is a methodology for problems that also contain wait-and-see variables.
+
+The adaptive two stage RO problem we address in this chapter has the following general form:
+
+\begin{align}\label{p3c5:adaptiveprob}
+z_{adapt} = \min\limits_{x,y(\cdot})} & c^T x + \max\limits_{z\in\keyunc} d^Ty(z) \\
+\stnew & A(z)x+ B(z)y(z) \leq \beta(z),\quad\forall z\in\keyunc \\
+& x\geq 0, y(z)\geq 0,
+\end{align}
+where $x\in\reals^{n_1}$ is the first-stage decision that is made before $z\in\reals^L$ is realized, and $y(z)\in\reals^{n_2}$ is the second-stage decision that can be adjusted according to the actual data. Note, that $y$ is not an optimization variable, but a function to be optimized. $A(z),B(z)$ are coefficient matrices that are linear in $z$, as is the right-hand-side $\beta(z)$. An important case is called fixed recourse, which is when the coefficient matrix $B$ of the adaptable variables is certain. In this chapter, we introduce exact and approximate solution methods for this problem.
+
+\section{Fourier-Motzkin Elimination}
+
+The idea of the method is to eliminate the second-stage decisions via Fourier-Motzkin elimination (FME). We illustrate the procedure via examples.
+
+\begin{example}{FME in two dimensions}
+We consider hte following ARO problem:
+\begin{align}
+\min\limits_{x,y} & x \\
+\stnew & x-y(z)\leq -z, &\forall z\in [0,1] \\
+& -x+y(z) \leq z + \frac{1}{2} &\forall z\in[0,1] \\
+& y(z) \geq 1 &\forall z\in[0,1]
+\end{align}
+The static robust model, where we assume $y(z) = y$, is as follows:
+\begin{align*}
+\min\limits_{x,y} & x \\
+\stnew & x-y\leq -1 \\
+& -x+y \leq \frac{1}{2} \\
+& y(z) \geq 1
+\end{align*}
+
+This problem is infeasible. To calculate the optimal value of the adaptable formulation, we rewrite its constraints as:
+\begin{align}
+y(z) &\geq x + z \\
+y(z) &\leq x+z+\frac{1}{2}\\
+y(z) &\geq 1.
+\end{align}
+Now we can eliminate $y(z)$ by combining the two $\geq$ constraints with the one $\leq$ constraint:
+\begin{align}
+\geq x + z &\leq x+z+\frac{1}{2} &\forall z\in [0,1]\\
+1 \leq x+z+\frac{1}{2} &\forall z\in [0,1]\\
+\end{align}
+The first constraint is always satisfied, and the second constraint yields $x\geq \frac{1}{2}$. Hence, the optimal adjustable value is $\frac{1}{2}$. The optimal decision rule for the second-stage decisions should satisfy:
+\begin{align*}
+\max\big{ 1,\frac{1}{2}+z\big} \leq y(z) \leq 1+z.
+\end{align*}
+Hence, both $y(z) = 1+z$ and $y(z) = \max \{1,\frac{1}{2}+z\}$ are optimal, and there are many other optimal $y(z)$.
+
+\end{example}
+
+As the example shows, to eliminate the adaptive variable $y$, we first rewrite the constraints to isolate the variable, and then consider all combinations of the opposing sides. If there are multiple adaptive variables, this procedure is repeated sequentially. From this procedure, it becomes obvious why non-fixed recourse leads to nonlinear uncertainties - if $y$ had uncertain coefficients, we would have to divide by that coefficient to isolate $y$, leading to a nonlinearity in the uncertainty.
+
+In principle, ARO problems with fixed recourse can be cast as static RO problems via FME. In general, this is very inefficient, since it is known to often yield an exponential number of constraints. However, there are two important aspects that make FME valuable for ARO:
+\begin{enumerate}
+	\item At each iteration of the FME process, we can detect redundant constraints. Since the complexity of this detection reduces to an LO problem, it may only be efficient for problems of larger complexity, such as ARO.
+	\tiem We can stop the FME process at any time if the number of constraints becomes too large, and apply heuristics for the remaining adaptive variables.
+\end{enumerate}
+Thus, combining FME with decision rule approximations improves the problem solutions.
+
+To detect redundant constraints, it must be verified whether there are values for $x,y$ and $z$  that violate the redundant constraint and satisfy all other constraints, which can be formulated as a deterministic optimization problem. Unfortunately, identifying a redundant constraint could thus be as hard as solving the optimization problem. It must therefore be taken care to only identify constraints that contain adaptive variables and therefore influence the FME process.
+
+\section{The Structure of Optimal ARO Solutions}
+
+By using FME, we discover in this section the structure of optimal ARO solutions for fixed recourse problems. For the following cases we can identify a certain solution structure:
+\begin{enumerate}
+	\item \textbf{If the uncertainty is constraint-wise, i.e., every uncertain parameter appears in at most one constraint, then a static robust optimal solution is also adaptive optimal.} If every uncertain parameter appears in at most one uncertain constraint, after the FME, it will always appear in the same manner (i.e., in the same expression and the same bound). This allows to identify a single worst-case value and replace the uncertain parameter with a constant, thereby leading to a static optimal solution.
+	
+	\item \textbf{If the problem structure is as in \eqref{p3c5:adaptiveprob}, then there exists an optimal solution for which the adaptive variables are piecewise linear in $z$.} After FME, the last eliminated variable has a piecewise linear lower and upper bound (minimum and maximum of linear functions). Using one of these as decision rule and replacing in the bound of the other variables yields piecewise linear functions again.
+	
+	\item \textbf{If there is only one uncertain parameter in problem \eqref{p3c5:adaptiveprob}, then there exists an optimal solution for which the adaptive variables are affine in $z$, i.e., a n optimal linear decision rule (LDR). } If there is only one uncertain parameter, we have as seen previously as lower bound the maximum of linear functions, which is convex, and as upper bound the minimum of linear functions, which is concave. In addition, $z$ lies in an interval. Thus, in between them, where $y$ must be, exists a linear optimal function.
+	
+	\item \textbf{ If the uncertainty set $\keyunc$ is a simplex, then then there exists an optimal linear decision rule.}  Same reasoning as above.
+\end{enumerate}
+
+\section{Finitely Adaptive Solutions}
+
+In Robust Optimization, a policy specifies a single solution that is feasible for all possible realizations of the uncertain parameters. On the other extreme, a fully adaptive solution policy specifies a solution for each possible realization of the uncertain parameters. Typically, the set of possible realizations is uncountable which often suffers from the curse of dimensionality. To bridge this gap, we may use a finitely adaptable solution policy, which instead of computing an optimal decision for each scenario, partitions the set of scenarios into a small number of sets and computes a single solution for each of the sets. The decision-maker chooses the partitioning of the set of scenarios. For problem \ref{p3c5:adaptiveprob}, we partition theu ncertainty set into two sets $\keyunc_1$ and $\keyunc_2$. We define the adaptive variables as 
+\begin{align*}
+y(z) = \begin{cases} y_1,\quad \text{if }z\in\keyunc_1, \\ y_2,\quad \text{if }z\in\keyunc_2.\end{cases}
+\end{align*} 
+In this case, the finitely adaptive problem becomes
+\begin{align}\label{p3c5:finadaptiveprob}
+\min\limits_{x,y_1,y_2} & c^T x + \max ( d^Ty_1,d^Ty_2) \\
+\stnew & A(z)x+ B(z)y_1 \leq \beta(z),\quad\forall z\in\keyunc_1 \\
+& A(z)x+ B(z)y_2 \leq \beta(z),\quad\forall z\in\keyunc_2 \\
+& x\geq 0, y_1,y_2\geq 0.
+\end{align}
+This is an RO problem that can be solved with classical RO methods. We can enhance this problem by creating $k$ partitions and defining an according number of $y$-variables. Moreover, the second-stage variables may be binary or integer. Overall, finite adaptability provides more flexibility than RO, often leading to better solutions and maintaining tractability. However, the computational burden is higher than RO as the number of variables increases.
