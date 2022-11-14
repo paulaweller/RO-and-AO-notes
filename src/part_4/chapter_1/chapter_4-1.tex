@@ -3,7 +3,7 @@ In previous chapters, we have assumed that all optimization variables are here-a
 The adaptive two stage RO problem we address in this chapter has the following general form:
 
 \begin{align}\label{p3c5:adaptiveprob}
-z_{adapt} = \min\limits_{x,y(\cdot})} & c^T x + \max\limits_{z\in\keyunc} d^Ty(z) \\
+z_{adapt} = \min\limits_{x,y(\cdot)} & c^T x + \max\limits_{z\in\keyunc} d^Ty(z) \\
 \stnew & A(z)x+ B(z)y(z) \leq \beta(z),\quad\forall z\in\keyunc \\
 & x\geq 0, y(z)\geq 0,
 \end{align}
@@ -13,8 +13,9 @@ where $x\in\reals^{n_1}$ is the first-stage decision that is made before $z\in\r
 
 The idea of the method is to eliminate the second-stage decisions via Fourier-Motzkin elimination (FME). We illustrate the procedure via examples.
 
-\begin{example}{FME in two dimensions}
-We consider hte following ARO problem:
+\textbf{Example in two dimensions}
+
+We consider the following ARO problem:
 \begin{align}
 \min\limits_{x,y} & x \\
 \stnew & x-y(z)\leq -z, &\forall z\in [0,1] \\
@@ -37,23 +38,22 @@ y(z) &\geq 1.
 \end{align}
 Now we can eliminate $y(z)$ by combining the two $\geq$ constraints with the one $\leq$ constraint:
 \begin{align}
-\geq x + z &\leq x+z+\frac{1}{2} &\forall z\in [0,1]\\
+ x + z \leq x+z+\frac{1}{2} &\forall z\in [0,1]\\
 1 \leq x+z+\frac{1}{2} &\forall z\in [0,1]\\
 \end{align}
 The first constraint is always satisfied, and the second constraint yields $x\geq \frac{1}{2}$. Hence, the optimal adjustable value is $\frac{1}{2}$. The optimal decision rule for the second-stage decisions should satisfy:
 \begin{align*}
-\max\big{ 1,\frac{1}{2}+z\big} \leq y(z) \leq 1+z.
+\max\{ 1,\frac{1}{2}+z\} \leq y(z) \leq 1+z.
 \end{align*}
 Hence, both $y(z) = 1+z$ and $y(z) = \max \{1,\frac{1}{2}+z\}$ are optimal, and there are many other optimal $y(z)$.
 
-\end{example}
 
 As the example shows, to eliminate the adaptive variable $y$, we first rewrite the constraints to isolate the variable, and then consider all combinations of the opposing sides. If there are multiple adaptive variables, this procedure is repeated sequentially. From this procedure, it becomes obvious why non-fixed recourse leads to nonlinear uncertainties - if $y$ had uncertain coefficients, we would have to divide by that coefficient to isolate $y$, leading to a nonlinearity in the uncertainty.
 
 In principle, ARO problems with fixed recourse can be cast as static RO problems via FME. In general, this is very inefficient, since it is known to often yield an exponential number of constraints. However, there are two important aspects that make FME valuable for ARO:
 \begin{enumerate}
 	\item At each iteration of the FME process, we can detect redundant constraints. Since the complexity of this detection reduces to an LO problem, it may only be efficient for problems of larger complexity, such as ARO.
-	\tiem We can stop the FME process at any time if the number of constraints becomes too large, and apply heuristics for the remaining adaptive variables.
+	\item We can stop the FME process at any time if the number of constraints becomes too large, and apply heuristics for the remaining adaptive variables.
 \end{enumerate}
 Thus, combining FME with decision rule approximations improves the problem solutions.
 

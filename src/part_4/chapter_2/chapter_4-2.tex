@@ -1,6 +1,6 @@
 In this chapter, we introduce algorithms to solve AROs based on decision rules. Specifically, we extensively discuss linear decision rules (LDRs).
 
-\begin{section}{Linear Decision Rules}
+\section{Linear Decision Rules}
 
 Using LDRs for the second-stage decisions results in a tractable RO problem. We consider one constraint of problem \ref{p3c5:adaptiveprob} and assume the right-hand side $b$ does not depend on $z$:
 \begin{align}\label{p3c6:constraint}
@@ -23,15 +23,15 @@ In this section, we introduce a dual reformulation of the ARO problem by consecu
 We start with the ARO problem:
 
 \begin{align}\label{p3c6:dualprob1}
-\min\limits_{x\inX,y(\cdot)\geq 0} \{c^Tx: Ax+By(z)\geq Rz+r,\quad\forall z\in\keyunc\}, \\
-\keyunc = \{z\geq0 : Dz\leq b\}.
+\min\limits_{x\in X,y(\cdot)\geq 0} \{c^Tx: Ax+By(z)\geq Rz+r,\quad\forall z\in\keyunc\}, \\
+\keyunc = \{z\geq 0 : Dz\leq b\}.
 \end{align}
 
 Although the uncertainty is in the right-hand side, the same derivation can be done for eft-hand side uncertainty, in case of fixed recourse. We rewrite \eqref{p3c6:dualprob1} as
 
 \begin{align}\label{p3c6:dualprob2}
-\min\limits_{x\inX}\max\limits_{z\in\keyunc}\min\limits_{y(\cdot)\geq 0} \{c^Tx: Ax+By(z)\geq Rz+r\}, \\
-\keyunc = \{z\geq0 : Dz\leq b\}.
+\min\limits_{x\in X}\max\limits_{z\in\keyunc}\min\limits_{y(\cdot)\geq 0} \{c^Tx: Ax+By(z)\geq Rz+r\}, \\
+\keyunc = \{z\geq 0 : Dz\leq b\}.
 \end{align}
 and dualize this over $y$, resulting in a $\min_x\;max_{z,w}$ formulation, where $w$ are the newly introduced dual variables. We subsequently dualize over $z$ in the inner max, which yields a formulation of the form $min_x\;max_w\;\min_\lambda$. With an epigraph formulation and exploiting the scalar multiplicity of the adaptive dual variable $\lambda$, we obtain the following dual reformulation.
 
@@ -45,13 +45,11 @@ The here-and-now decision $x$ is feasible and optimal for \eqref{p3c6:dualprob1}
 where $\mathcal{V} = \{w\geq 0:\; B^Tw\leq 0,\; e^Tw = 1\}.$
 \end{theorem}
 
-If LDRs are adopted for $\lambda(w)$$, then \eqref{p3c6:dualreformulation} yields a tractable problem. Since it is an ARO problem, the complexity isn't reduced in a strict sense, but the reformulation provides better lower bounds in the following approach: We seek to find lower bounds by solving the primal and dual problems for a finite number of scenarios. To make the bounds tight, we obtain informative scenarios in the following way: We adopt an affine decision policy in each of the problems and identify in each case via an optimization problem binding scenarios. These scenarios are added to the finite set. Then we solve the combined primal and dual problem for this finite set of binding scenarios. The hope is that scenarios which are binding for the affine problem are also binding for the general solution.
+If LDRs are adopted for $\lambda (w)$, then \eqref{p3c6:dualreformulation} yields a tractable problem. Since it is an ARO problem, the complexity isn't reduced in a strict sense, but the reformulation provides better lower bounds in the following approach: We seek to find lower bounds by solving the primal and dual problems for a finite number of scenarios. To make the bounds tight, we obtain informative scenarios in the following way: We adopt an affine decision policy in each of the problems and identify in each case via an optimization problem binding scenarios. These scenarios are added to the finite set. Then we solve the combined primal and dual problem for this finite set of binding scenarios. The hope is that scenarios which are binding for the affine problem are also binding for the general solution.
 
 Numerical results show that the combined primal and dual binding scenarios  yield lower bounds that are up to 31 \% stronger compared to a primal scenario only approach. \highlight{Moreover, the dual reformulation can be solved much faster than the primal one}{Why?}.
 
 \sidenote{What does combining primal&dual in general do?}
-
-\pdfnote
 
 \section{LDRs with Inexact Data}
 
@@ -62,14 +60,39 @@ So far, we have assumed that there is a moment in time where the data $z$ is kno
 y = u + V\hat{z}.
 \end{align*}
 We call the RC in this new setting the affinely adaptive RC with decision rules based on inexact data (ARCID):
-
-
-
-
-
-\begin{align}\label{p3c5:adaptiveprob}
-z_{adapt} = \min\limits_{x,y(\cdot})} & c^T x + \max\limits_{z\in\keyunc} d^Ty(z) \\
-\stnew & A(z)x+ B(z)y(z) \leq \beta(z),\quad\forall z\in\keyunc \\
-& x\geq 0, y(z)\geq 0,
+\begin{align}\label{p3c6:ARCID}
+\min\limits_{x,u,V} & c^Tx \\
+\stnew & (\ol{a}_i+P_iz)^Tx + d_i^T(u+V\hat{z}) \leq b_i, \quad \forall i\in [J],\quad\forall(z,\hat{z})\in\uncset,
 \end{align}
-where $x\in\reals^{n_1}$ is the first-stage decision that is made before $z\in\reals^L$ is realized, and $y(z)\in\reals^{n_2}$ is the second-stage decision that can be adjusted according to the actual data. Note, that $y$ is not an optimization variable, but a function to be optimized. $A(z),B(z)$ are coefficient matrices that are linear in $z$, as is the right-hand-side $\beta(z)$. An important case is called fixed recourse, which is when the coefficient matrix $B$ of the adaptable variables is certain. In this chapter, we introduce exact and approximate solution methods for this problem.
+where
+\begin{align}\label{p3c6:ARCID-U}
+\uncset = \{(z,\hat{z})\; : \; z,\hat{z}\in\keyunc, (\hat{z}-z)\in\hat{\keyunc}\}
+\end{align}
+is a new uncertainty set that describes the uncertain parameter $z$, its estimate $\hat{z}$ and the relation between them. Note that $\uncset$ is closed and convex whenever $\keyunc$ and $\hat{\keyunc}$ are closed and convex. In addition, bot $z$ and $\hat{z}$ are within the set $\keyunc$. Another modeling choice could be leaving out that condition, in which case $\hat{z}$ is from a larger uncertainty set, on which the decision rule should also be valid. This may lead to more conservative solutions.
+
+For notational ease, we omit the constraint index $i$ in \eqref{p3c6:ARCID} and \highlight{ reformulate the constraint similar to how we would derive the RC of a classical RO problem.}{support functions?}
+
+\begin{theorem}\label{p3c6:ARCID-thm}
+Let $\uncset$ be a convex set as given in \eqref{p3c6:ARCID-U}. Then $(x,u,V)$ satisfies the constraint
+\[  (\ol{a}+Pz)^Tx + d^T(u+V\hat{z}) \leq b, \quad \forall (z,\hat{z})\in\uncset\]
+if and only if there exists a $w\in\reals^L$ that satisfies
+\[ \ol{a}^Tx+d^Tu+ \max_{z\in\keyunc} \{(P^Tx-w)^Tz\} + \max_{z\in\keyunc}\{ (V^Td+w)^Tz\} + \max_{z\in\hat{\keyunc}} \{w^Tz\}\leq b\]
+\end{theorem}
+
+\textbf{Example: Box-Box Uncertainty Sets}\label{p3c6:exampleboxbox}
+
+If $\keyunc = \{z : \norm{z}_\infty \leq \theta \}$ and $\hat{\keyunc} = \{z : \norm{z}_\infty \leq rho \}$ for $\theta, rho \geq 0$ then, according to theorem \eqref{p3c6:ARCID-thm}, $(x,u,V)$ satisfies the ARCID constraint if and only if there exists a $w\in\reals^L$ such that
+\[\ol{a}^Tx+d^T+\theta \norm{P^Tx-w}_1 + \theta\norm{V^Td+w}_1+\rho\norm{w}_1\leq b,\]
+which can be represented by a set of linear constraints.
+
+
+\textbf{Example: Box-Ball Uncertainty Sets}\label{p3c6:exampleboxball}
+
+If $\keyunc = \{z : \norm{z}_\infty \leq \theta \}$ and $\hat{\keyunc} = \{z : \norm{z}_2 \leq rho \}$ for $\theta, rho \geq 0$ then, according to theorem \eqref{p3c6:ARCID-thm}, $(x,u,V)$ satisfies the ARCID constraint if and only if there exists a $w\in\reals^L$ such that
+\[\ol{a}^Tx+d^T+\theta \norm{P^Tx-w}_1 + \theta\norm{V^Td+w}_1+\rho\norm{w}_2\leq b,\]
+which can be represented by a set of linear constraints and a conic quadratic constraint.
+
+
+Theorem \eqref{p3c6:ARCID-thm} implies that the new ARCID model bridges the gap between models that do not use information at all in the second stage (RC) and those that rely on fully accurate revealed information in the decision rules (ARC). Namely, if the estimation uncertainty is large (i.e., $\hat{\keyunc}$ is large), then there is no value in the revealed inexact data. In that case the optimal value of the nonadaptive version is equal to the optimal value of ARCID, i.e., there exists an optimal decision rule with $V = 0$. For Examples \eqref{p3c6:exampleboxbox} and \eqref{p3c6:exampleboxball}, we have that  the ARCID model is equivalent to the nonadaptive model when $\rho\geq\theta$ for the fiorst example, and $\rho\geq \sqrt{L}\theta$ for the second example. In case there is no estimation error ($\hat{\keyunc} = \{ 0 \}$), the ARC and the ARCID are equivalent in the sense that they have the same feasible set and the same optimal objective value.
+
+An experiment with a production-inventory problem show that the ARCID does not offer much change within the objective values, but it significantly effects the feasibility of the solutions.
