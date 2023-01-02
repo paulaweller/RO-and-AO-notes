@@ -1,0 +1,76 @@
+% pareto robustly optimal solutions
+
+Robust optimal solutions are always optimal with respect to worst-case scenarios of the uncertain parameters, since they are optimized with respect to the worst-case. However, alternative robust optimal solutions that give the same worst-case objective function value may yield very different objective values for non-worst-case realizations of the uncertain parameters. A solution is called \textit{pareto robustly optimal} (PRO) when its performance in one scenario cannot be improved without worsening its performance in another scenario.
+
+In this chapter, we develop a deeper understanding of PRO solutions and discuss their implications to RO broadly:
+ \begin{enumerate}
+ 	\item By ignoring the possibility of multiple optimal solutions, we may undervalue or overvalue ARO relative to RO.
+ 	\item Even in cases where RO and ARO are equivalent, i.e., they have the same worst-case optimal objective value, ARO solutions may provide much better solutions for the average objective value.
+ 	\item Even in cases where LDRs are (nearly) optimal, i.e., the optimal robust objective value cannot be improved by using nonlinear decision rules, nonlinear decision rules may yield much better solutions for the average objective value. 
+ \end{enumerate}
+ 
+ The key message of the chapter is while RO and ARO models are designed to optimize the worst-case, the existence of multiple RO and ARO solutions provides flexibility in also finding those solutions that optimize the average case. Such a message is particularly relevant from a practical point of view as it gives guidance on how to use RO and ARO models in practice.
+ 
+\section{An Illustrative Example}
+
+In this section, we examine the impact of PRO solutions in a simple example, demonstrating that the effect of multiple adaptive robust solutions can be significant.  Consider the following maximization problem:
+\begin{align}\label{p4c3:illustexample}
+\max_{x,y}\;\min_{a\in [0,1]}\; & ax - y\\
+\stnew & y + b^2 + b \geq 0, \quad \forall b\in[0,1] \\
+& 0\leq x \leq 1.
+\end{align}
+
+\textbf{RO solution}
+
+Solved as an RO problem, i.e., $x,y$ are static decisions, we obtain as worst-case objective value 0 for the two optimal solutions 
+\begin{align*}
+(x_{RO1},y_{RO1}) & = (1,0) \\
+(x_{RO2},y_{RO2}) & = (0,0)
+\end{align*}
+or any convex combination of these. From the perspective of optimal worst-case profits, we are indifferent between these. However, the actually observed profits from the two solutions are respectively $z_{RO1} (a,b) = a$ and $z_{RO2}(a,b) = 0$. If we wish to maximize the average profit, we should therefore prefer solution RO1. We can obtain such solutions using Algorithm \ref{alg:PROsolutions}.
+ 
+ \begin{algorithm}
+\caption{Generating Pareto Robustly Optimal Solutions}\label{alg:PROsolutions}
+\begin{algorithmic}
+Input: Description of the uncertainty set $\uncset$ in an RO problem \\
+Output: A PRO solution
+\begin{enumerate}
+	\item Solve the RC of the robust problem, which gives a solution with minimum worst-case cost. 
+	\item Add a constraint that ensures that the worst-case cost does not exceed the cost found in Step 1.
+	\item Change the objective into minimizing the cost for the average demand trajectory.
+\item Solve the modified problem and output the solution.
+\end{enumerate}
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{LDR solution}
+
+Now suppose that $y$ is adaptive and we restrict ourselves to LDRs. Optimal solutions are
+\begin{align*}
+(x_{LDR1},y_{LDR1}) & = (1,-b) \\
+(x_{LDR2},y_{LDR2}) & = (0, -\frac{1}{2}b)
+\end{align*}
+with respective profits $z_{LDR1} (a,b) = a + b$ and $z_{LDR2}(a,b) = \frac{1}{2}b$. Both have worst-case objective value 0, but hte profit is higher for LDR1.
+
+\textbf{ARO solution}
+
+Now suppose that $y$ is adaptive and we allow the use of nonlinear decision rule (NDR). Two possible solutions are
+\begin{align*}
+(x_{ARO1},y_{ARO1}) & = (1,-b^2-b) \\
+(x_{ARO2},y_{ARO2}) & = (0, -\frac{1}{2}b^3),
+\end{align*}
+where ARO1 also corresponds to a perfect hindsight solution where we know the values of $a,b$ before we make the decisions $x,y$. 
+with respective profits $z_{ARO1} (a,b) = a + b^2+b$ and $z_{RO2}(a,b) = \frac{1}{2}b^3$. Both have worst-case objective value 0, but different realized profits is higher for ARO1.
+
+With two small assumptions on the distribution of $a$ and $b$, we can calculate the average profits for each solution: If  a) not all probability mass of $b$ lies on the extremes  and b) the average value of $a$ and $b$ is such that $\mathbb{E}(a) > \frac{1}{2}\mathbb{E}(b)$, then we have
+\[ z_{ARO1} > z_{LDR1} > z_{RO1} > z_{LDR2} >  z_{ARO2} >z_{RO2}. \] 
+
+This example illustrates several things.
+\begin{enumerate}
+	\item An arbitrary ARO solution is not guaranteed to do better than a RO solution with respect to average performance.
+	\item Even if ARO and RO are equivalent with respect to worst-case performance, this does not necessarily hold for average performance (all solutions in the example have worst-case objective 0, but differ in average profit). Therefore, one should not ignore ARO for such problems.
+	\item Even if LDRs yield optimal worst-case performance, nonlinear decision rules can yield much better average performance.
+\end{enumerate}
+
+The encompassing recommendation is to apply Algorithm \ref{alg:PROsolutions} in any application of RO as it enables us to fully exploit the performance on the average objective value of the solution, while guaranteeing no deterioration in the worst-case performance.
+

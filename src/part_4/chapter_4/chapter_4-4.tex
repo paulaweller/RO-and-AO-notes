@@ -1,0 +1,46 @@
+% Adaptive Mixed integer Optimization
+
+In this chapter, we present a partition-and-bound method for multi-stage adaptive mixed integer optimization (AMIO) problems that extends the idea of finite adaptability for RO we presented previously .We consider the multi-stage AMIO problem with objective function value $z_{full}$
+
+\begin{align}\label{p4c4:AMIOproblem}
+\min_{x\in\mathcal{X}}\;\max_{z\in\keyunc}\; & \sum_{t=1}^T c_t^T(z) x_t (z^1,\dots ,z^{t-1})\\
+\stnew & \sum_{t=1}^T A_t(z)x_t(z^1,\dots , z^{t-1}) \leq b(z),\quad\forall z = (z^1,\dots ,z^T)\in\keyunc,
+\end{align}
+
+where $z$ represents the uncertain parameters, A, b and c define linear constraints and the objective respectively (all themselves affine functions of $z$), and $x_t$ is the vector of decision variables for stage $t$, which can be a mixture of discrete and continuous variables as captured by the deterministic set of constraints $\mathcal{X}$. For $t = 1$ we note that $x_1$ is a non-adaptive here-and-now decision that does not depend on $z$.
+
+In this chapter, we develop a partition-and-bound method for solving the multi-stage AMIO problem that scales well especially for larger instances. The criterion by which we assess a method is the quality of the solutions it finds versus the computational effort required to obtain them. The method builds on the finite adaptability approach by utilizing the information obtained about the (possibly already partitioned) uncertainty set when solving an ARO problem to select a new partitioning scheme. The same information is used to calculate a lower bound on the fully adaptive solution by adapting the LDR sampling approach.
+
+\section{Partition and Bound Method for Two-Stage AMIO}
+
+In this section, we describe the partition-and-bound method for two-stage AMIO problems. In particular, we consider the problem 
+\begin{align}\label{p4c4:2stageproblem}
+\min_{x\in\mathcal{X},\xi}\;\xi \\
+\stnew & c_1^T ( z) x_1 + c_2^T(z) x_2 ( z) \leq \xi, \quad &&\forall z\in\keyunc, \\
+	& a_{1i}^T(z)x_1 + a_{2i}^T(z) x_2(z) \leq b_i(z),\quad&&\forall z\in\keyunc, \forall i\in [m],
+\end{align}
+where the objective is expressed in epigraph form. This is a special case of the multi-stage problem \eqref{p4c4:AMIOproblem} where $T=2$. We first demonstrate some properties of ARO solutions that motivate the design of the Partition and Bound (PB) method we present in this chapter, then discuss the implementation details.\\
+
+\textbf{A Partitioning scheme}\\
+
+Previously, we introduced finite adaptability for approximating fully adaptive wait-and-see decisions that can vary with the uncertain parameters. In the context of the two-stage problem \eqref{p4c4:2stageproblem} we can view finite adaptability as a restriction of the decisions $x_2(z)$ to the class of piecewise constant policies, i.e.,
+\begin{equation}
+x_2(z) = \begin{cases} x_2^1,\quad\forall z\in\keyunc_1 \\
+										\vdots \\
+										x_2^K,\quad\forall z\in\keyunc_K, \end{cases}
+\end{equation}
+where $\keyunc_k, k\in [K]$ defines a partitioning of $\keyunc$ and $x_2^k$ is the implemented decision if the realized value of $z$ is in the partition $\keyunc_k$. If the realized value lies on the boundary of two partitions we may select either decision. We will converge in the limit to the fully adaptive solution as the number of partitions grows and the diameter of the largest partition approaches zero. Therefore, there is a natural tradeoff  between the number of partitions (and the solution time) and how close the solution is to the fully adaptive solution, and a goal when using finite adaptability is to identify a partitioning scheme that is near the efficient frontier of this tradeoff.
+
+To motivate the selection of partitioning scheme, recall that in a robust problem, each uncertain constraint is represented by one deterministic constraint for each element $z$ in the uncertainty set. If such a deterministic constraint has zero slack, the corresponding uncertainty value $z$ is called \textit{active uncertain parameter}. Any uncertain constraint may have zero, one or more of such values. They can be imagined as pinpoints for the robustness, actively forcing the solution to adapt. We denote with $\mathcal{A}$ the set of all active uncertain parameters. It is necessary for the partitioning scheme to separate $\mathcal{A}$, that is, $\mathcal{A}$ can not be contained in the same partition, in order to improve the objective value of the K-adaptable problem. This naturally leads us to consider partitioning schemes that will achieve this required condition, and thus enable improvement.
+
+ A partitioning scheme that achieves this is one in which every active parameter  in $\mathcal{A}$ lies in its own partition. A simple way (both conceptually and computationally) to construct such a set of partitions is to use a \textit{Voronoi diagram}. Given a set of points $1,\dots,K$, the original set is separated by Euclidian distance to these points, where each element in the original set is assigned to the point $i$ it is closest to. The line separating two points $i,j$ therefore has equal distance to these points.\\
+
+\textbf{Description of the method}\\
+
+We can now build an iterative method built around this partitioning scheme. The method starts by solving a static-policy version of the adaptive optimization problem to determine a set of active uncertain parameters.We use these to construct a finitely-adaptive version of the problem, and solve that. This in turn produces a new set of active uncertain parameters which we can then use to partition further in a nested manner, ideally improving on the previous solution at each iteration.
+
+This approach can be used for other problem classes as well (such as quadratic objectives or second-order cone constraints), as long as the key primitive of being able to extract active parameters is present.
+
+\textbf{Calculating lower bounds}\\
+
+The PB apprioach ideally produces successfully closer approximations to the fully adaptive problem. The most natural termination criterion then, apart from an iteration- or time-limit criterion, is to terminate when the approximation (an upper bound, as we are minimizing) is sufficiently close to the fully adaptive solution. As we do not know the fully adaptive solution, we propose using the set of uncertain parameters available at the end of the current iteration to obtain a lower bound.
